@@ -1,0 +1,100 @@
+name: "Pyinstaller Windows"
+description: "Convert python script to windows executable using pyinstaller"
+
+inputs:
+  python-requirements-file-path:
+    description: "path to the python requirements file"
+    default: ""
+  python-version:
+    description: "python version to be used"
+    default: "x.x.x"
+  input-file-path:
+    description: "path to the python script to be converted to an executable"
+    required: true
+  onefile:
+    description: "create a one-file bundled executable instead of one-folder bundled one"
+    default: "true"
+  no-console:
+    description: "do not provide a console window for standard i/o"
+    default: "false"
+  output-name:
+    description: "name of the output executable or directory"
+    default: ""
+  output-path:
+    description: "path to the output directory"
+    default: "output"
+  icon-path:
+    description: "path to the icon file (.ico) to be used as the icon for the executable"
+    default: ""
+  additional-data:
+    description: "additional data to be used via --add-data"
+    default: ""
+  paths:
+    description: "additional paths to be used via --paths"
+    default: ""
+  hidden-imports:
+    description: "additional hidden imports to be used via --hidden-import"
+    default: ""
+  exclude-modules:
+    description: "modules to be excluded via --exclude-module"
+    default: ""
+  additional-arguments:
+    description: "additional arguments to be passed to pyinstaller"
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: execute python script
+      id: py
+      shell: cmd
+      run: |
+        python -u "${{ github.action_path }}/src/input_parser.py"
+      env:
+        INPUT_PYTHON_REQUIREMENTS_FILE_PATH: ${{ inputs.python-requirements-file-path }}
+        INPUT_INPUT_FILE_PATH: ${{ inputs.input-file-path }}
+        INPUT_ONEFILE: ${{ inputs.onefile }}
+        INPUT_NO_CONSOLE: ${{ inputs.no-console }}
+        INPUT_OUTPUT_NAME: ${{ inputs.output-name }}
+        INPUT_OUTPUT_PATH: ${{ inputs.output-path }}
+        INPUT_ICON_PATH: ${{ inputs.icon-path }}
+        INPUT_ADDITIONAL_DATA: ${{ inputs.additional-data }}
+        INPUT_PATHS: ${{ inputs.paths }}
+        INPUT_HIDDEN_IMPORTS: ${{ inputs.hidden-imports }}
+        INPUT_EXCLUDE_MODULES: ${{ inputs.exclude-modules }}
+
+    - name: install specific python version
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: install dependencies
+      shell: cmd
+      run: |
+        IF "{{ env.PYTHON_REQUIREMENTS_FILE_PATH }}" NEQ "" (
+          pip install -r "${{ env.PYTHON_REQUIREMENTS_FILE_PATH }}"
+        )
+        pip install pyinstaller
+      env:
+        PYTHON_REQUIREMENTS_FILE_PATH: ${{ steps.py.outputs.python_requirements_file_path }}
+
+    - name: freeze python script
+      shell: cmd
+      run: |
+        rmdir /s /q ".\\pyinstaller_tmp"
+        mkdir ".\\pyinstaller_tmp"
+        mkdir ".\\pyinstaller_tmp\\pyinstaller_cache_dir"
+        pyinstaller --noconfirm --clean --workpath ".\\pyinstaller_tmp\\pyinstaller_install_dir\\" --specpath ".\\pyinstaller_tmp" --name "${{ env.OUTPUT_NAME }}" ${{ env.ONEFILE }} ${{ env.NO_CONSOLE }} ${{ env.OUTPUT_PATH }} ${{ env.ICON }} ${{ env.ADDITIONAL_DATA }} ${{ env.PATHS }} ${{ env.HIDDEN_IMPORTS }} ${{ env.EXCLUDE_MODULES }} ${{ env.ADDITIONAL_ARGUMENTS }} "${{ env.FILE_PATH }}"
+        rmdir /s /q ".\\pyinstaller_tmp"
+      env:
+        FILE_PATH: ${{ steps.py.outputs.file_path }}
+        ONEFILE: ${{ steps.py.outputs.onefile }}
+        NO_CONSOLE: ${{ steps.py.outputs.no_console }}
+        OUTPUT_NAME: ${{ steps.py.outputs.output_name }}
+        OUTPUT_PATH: ${{ steps.py.outputs.output_path }}
+        ICON: ${{ steps.py.outputs.icon }}
+        ADDITIONAL_DATA: ${{ steps.py.outputs.additional_data }}
+        PATHS: ${{ steps.py.outputs.paths }}
+        HIDDEN_IMPORTS: ${{ steps.py.outputs.hidden_imports }}
+        EXCLUDE_MODULES: ${{ steps.py.outputs.exclude_modules }}
+        ADDITIONAL_ARGUMENTS: ${{ inputs.additional-arguments }}
