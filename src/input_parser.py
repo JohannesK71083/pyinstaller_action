@@ -3,6 +3,8 @@ from posixpath import abspath
 from sys import exc_info, stderr
 from traceback import format_exc
 from GithubStorageManager import GithubENVManager, GithubOutputManager
+from github_actions_logger import use_std_config
+from lib_python.logger import Logger
 
 
 def print_to_err(x: str) -> None:
@@ -39,6 +41,9 @@ class OutputStorage(GithubOutputManager):
     paths: str
     hidden_imports: str
     exclude_modules: str
+
+
+logger: Logger
 
 
 def validate_inputs():
@@ -127,6 +132,13 @@ def validate_inputs():
 
 if __name__ == "__main__":
     try:
+        logger = Logger("InputParser")
+        use_std_config()
+        logger.debug("DEBUG")
+        logger.info("INFO")
+        logger.warning("WARNING")
+        logger.error("ERROR")
+        logger.critical("CRITICAL")
         validate_inputs()
     except BaseException as e:
         exc = format_exc()
