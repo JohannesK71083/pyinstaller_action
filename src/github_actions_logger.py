@@ -3,7 +3,7 @@
 
 from sys import stderr, stdout
 from typing import TextIO
-from .lib_python.logger import LOG_LEVEL, LogStream, StreamHandler
+from lib_python.logger import LOG_LEVEL, LogStream, StreamHandler
 
 
 class GithubErrorStream(TextIO):
