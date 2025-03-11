@@ -3,6 +3,9 @@ from sys import exc_info, stderr
 from traceback import format_exc
 from lib.github_storage_manager import GithubENVManager, GithubOutputManager
 
+from lib.logger_gh_actions import use_std_config
+from lib.logger import Logger
+
 
 def print_to_err(x: str) -> None:
     return print(x, file=stderr)
@@ -40,10 +43,20 @@ class OutputStorage(GithubOutputManager):
     exclude_modules: str
 
 
+logger: Logger
+
+
 def validate_inputs():
     if (python_requirements_file := ENVStorage.INPUT_PYTHON_REQUIREMENTS_FILE_PATH) != "":
         if not path.exists(python_requirements_file):
             raise InputError(f"python-requirements-file-path {python_requirements_file} does not exist!")
+        OutputStorage.python_requirements_file_path = python_requirements_file = path.abspath(python_requirements_file)
+
+        logger.debug(f"Use python requirement file: {python_requirements_file}")
+    else:
+        OutputStorage.python_requirements_file_path = ""
+
+        logger.debug("No python requrement file")
 
 
     if (input_file := ENVStorage.INPUT_INPUT_FILE_PATH) == "":
@@ -53,45 +66,69 @@ def validate_inputs():
         raise InputError(f"input-file-path {input_file} does not exist!")
     OutputStorage.file_path = input_file
 
+    logger.debug(f"Use python input file: {input_file}")
+
     if (onefile := ENVStorage.INPUT_ONEFILE) not in ["true", "false"]:
         raise InputError(f"onefile must be either true or false, got {onefile}!")
     OutputStorage.onefile = "--onefile" if onefile == "true" else ""
+
+    logger.debug(f"onefile mode: {onefile == 'true'}")
 
     if (no_console := ENVStorage.INPUT_NO_CONSOLE) not in ["true", "false"]:
         raise InputError(f"no-console must be either true or false, got {no_console}!")
     OutputStorage.no_console = "--noconsole" if no_console == "true" else ""
 
+    logger.debug(f"noconsole mode: {no_console == 'true'}")
+
     if (output_name := ENVStorage.INPUT_OUTPUT_NAME) == "":
         output_name = path.splitext(path.basename(input_file))[0]
     OutputStorage.output_name = output_name
+    logger.debug(f"Use output name: {output_name}")
 
     if (output_path := ENVStorage.INPUT_OUTPUT_PATH) == "":
+
         raise InputError("output-path is required!")
     output_path = path.abspath(output_path.replace('"', ""))
     OutputStorage.output_path = '--distpath "' + output_path + '"'
+
+    logger.debug(f"Use output path: {output_path}")
 
     if (icon_path := ENVStorage.INPUT_ICON_PATH) != "":
         icon_path = path.abspath(icon_path.replace('"', ""))
         if not path.exists(icon_path) or not path.isfile(icon_path):
             raise InputError(f"icon-path {icon_path} does not exist!")
         OutputStorage.icon = '--icon "' + icon_path + '"'
+
+        logger.debug(f"Use icon: {icon_path}")
     else:
         OutputStorage.icon = ""
 
+        logger.debug("No icon")
+
     if (additional_data := ENVStorage.INPUT_ADDITIONAL_DATA) != "":
         additional_datas_in = additional_data.replace('"', "").split("\n")
+
+
         additional_datas_out: list[tuple[str, str]] = []
         while "" in additional_datas_in:
             additional_datas_in.remove("")
         for p in additional_datas_in:
             ad_path, ad_target = p.split(";")
+
+
             ad_path = path.abspath(ad_path)
             if not path.exists(ad_path):
                 raise InputError(f"additional-data path {ad_path} does not exist!")
+
+
             additional_datas_out.append((ad_path, ad_target))
         OutputStorage.additional_data = "--add-data " + " --add-data ".join([f'"{ad_path};{ad_target}"' for ad_path, ad_target in additional_datas_out])
+
+        logger.debug(f"Use additional data: {additional_datas_out}")
     else:
         OutputStorage.additional_data = ""
+
+        logger.debug("No additional data")
 
     if (paths := ENVStorage.INPUT_PATHS) != "":
         paths_in = paths.replace('"', "").split("\n")
@@ -99,38 +136,55 @@ def validate_inputs():
         while "" in paths_in:
             paths_in.remove("")
         for p in paths_in:
+
+
             p = path.abspath(p)
             if not path.exists(p):
                 raise InputError(f"path {p} does not exist!")
             paths_out.append(f'"{p}"')
         OutputStorage.paths = "--paths" + ";".join(paths_out)
+
+        logger.debug(f"Use additional paths: {paths_out}")
     else:
         OutputStorage.paths = ""
+
+        logger.debug("No additional paths")
 
     if (hidden_imports := ENVStorage.INPUT_HIDDEN_IMPORTS) != "":
         hidden_imports = hidden_imports.split("\n")
         while "" in hidden_imports:
             hidden_imports.remove("")
         OutputStorage.hidden_imports = "--hidden-import " + " --hidden-import ".join(hidden_imports)
+
+        logger.debug(f"Use hidden imports {hidden_imports}")
     else:
         OutputStorage.hidden_imports = ""
+
+        logger.debug("No hidden imports")
 
     if (exclude_modules := ENVStorage.INPUT_EXCLUDE_MODULES) != "":
         exclude_modules = exclude_modules.split("\n")
         while "" in exclude_modules:
             exclude_modules.remove("")
         OutputStorage.exclude_modules = "--exclude-module " + " --exclude-module ".join(exclude_modules)
+
+        logger.debug(f"Use exclude modules: {exclude_modules}")
     else:
         OutputStorage.exclude_modules = ""
+
+        logger.debug("No excluded modules")
 
 
 if __name__ == "__main__":
     try:
+        use_std_config()
+        logger = Logger("")
         validate_inputs()
     except BaseException as e:
         exc = format_exc()
         exc_type, exc_obj, exc_tb = exc_info()
         ln = exc_tb.tb_lineno if exc_tb is not None else -1
         fname = path.split(exc_tb.tb_frame.f_code.co_filename)[1] if exc_tb is not None else ""
+        # gets primted differently therefore not per logger
         print_to_err(f"::error title={type(e).__name__}::{type(e).__name__}: {str(e)}\n{exc}")
         exit(1)

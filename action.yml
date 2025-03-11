@@ -45,11 +45,14 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: execute python script
+    - name: run input parser
       id: py
       shell: cmd
       run: |
+        :: INPUT-PARSER
+        echo ::group::OUTPUT INPUT-PARSER
         python -u "${{ github.action_path }}/src/input_parser.py"
+        echo ::endgroup::
       env:
         INPUT_PYTHON_REQUIREMENTS_FILE_PATH: ${{ inputs.python-requirements-file-path }}
         INPUT_INPUT_FILE_PATH: ${{ inputs.input-file-path }}
@@ -71,21 +74,27 @@ runs:
     - name: install dependencies
       shell: cmd
       run: |
+        :: INSTALL DEPENDENCIES
+        echo ::group::OUTPUT INSTALL DEPENDENCIES
         IF "{{ env.PYTHON_REQUIREMENTS_FILE_PATH }}" NEQ "" (
           pip install -r "${{ env.PYTHON_REQUIREMENTS_FILE_PATH }}"
         )
         pip install pyinstaller
+        echo ::endgroup::
       env:
         PYTHON_REQUIREMENTS_FILE_PATH: ${{ steps.py.outputs.python_requirements_file_path }}
 
-    - name: freeze python script
+    - name: run pyinstaller
       shell: cmd
       run: |
+        :: RUN PYINSTALLER
+        echo ::group::OUTPUT RUN PYINSTALLER
         rmdir /s /q ".\\pyinstaller_tmp"
         mkdir ".\\pyinstaller_tmp"
         mkdir ".\\pyinstaller_tmp\\pyinstaller_cache_dir"
         pyinstaller --noconfirm --clean --workpath ".\\pyinstaller_tmp\\pyinstaller_install_dir\\" --specpath ".\\pyinstaller_tmp" --name "${{ env.OUTPUT_NAME }}" ${{ env.ONEFILE }} ${{ env.NO_CONSOLE }} ${{ env.OUTPUT_PATH }} ${{ env.ICON }} ${{ env.ADDITIONAL_DATA }} ${{ env.PATHS }} ${{ env.HIDDEN_IMPORTS }} ${{ env.EXCLUDE_MODULES }} ${{ env.ADDITIONAL_ARGUMENTS }} "${{ env.FILE_PATH }}"
         rmdir /s /q ".\\pyinstaller_tmp"
+        echo ::endgroup::
       env:
         FILE_PATH: ${{ steps.py.outputs.file_path }}
         ONEFILE: ${{ steps.py.outputs.onefile }}
