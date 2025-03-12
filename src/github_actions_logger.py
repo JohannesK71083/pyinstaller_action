@@ -8,25 +8,25 @@ from lib_python.logger import LOG_LEVEL, LogStream, StreamHandler
 
 class GithubErrorStream(TextIO):
     def write(self, message: str) -> int:
-        print(f"::error::{message}", file=stderr, flush=True)
+        print(f"::error::{message}", file=stderr, flush=True, end="")
         return len(message)
 
 
 class GithubWarningStream(TextIO):
     def write(self, message: str) -> int:
-        print(f"::warning::{message}", file=stderr, flush=True)
+        print(f"::warning::{message}", file=stderr, flush=True, end="")
         return len(message)
 
 
 class GithubInfoStream(TextIO):
     def write(self, message: str) -> int:
-        print(f"::notice::{message}", file=stdout, flush=True)
+        print(f"::notice::{message}", file=stdout, flush=True, end="")
         return len(message)
 
 
 class GithubDebugStream(TextIO):
     def write(self, message: str) -> int:
-        print(f"{message}", file=stdout, flush=True)
+        print(f"{message}", file=stdout, flush=True, end="")
         return len(message)
 
 
