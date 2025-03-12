@@ -50,13 +50,14 @@ runs:
       with:
         path: "${{ github.action_path }}"
         submodules: "recursive"
+        repository: "${{ github.action_repository }}"
     - shell: cmd
       run: |
         echo ${{ env.TEST }}
         echo ${{ env.TEST2 }}
       env:
         TEST: ${{ github.action_repository }}
-        TEST2: ${{ github.repository }}
+        TEST2: ${{ github.action_path }}
     - name: execute python script
       id: py
       shell: cmd
