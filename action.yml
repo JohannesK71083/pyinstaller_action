@@ -45,19 +45,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: checkout repository
-      uses: actions/checkout@v4
-      with:
-        path: "${{ github.action_path }}"
-        submodules: "recursive"
-        repository: "${{ github.action_repository }}"
     - shell: cmd
       run: |
-        echo ${{ env.TEST }}
-        echo ${{ env.TEST2 }}
-      env:
-        TEST: ${{ github.action_repository }}
-        TEST2: ${{ github.action_path }}
+        cd ${{ github.action_path }}
+        git submodule update --init --recursive
     - name: execute python script
       id: py
       shell: cmd
