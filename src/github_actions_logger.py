@@ -20,7 +20,7 @@ class GithubWarningStream(TextIO):
 
 class GithubInfoStream(TextIO):
     def write(self, message: str) -> int:
-        print(f"::info::{message}", file=stdout, flush=True)
+        print(f"::notice::{message}", file=stdout, flush=True)
         return len(message)
 
 
