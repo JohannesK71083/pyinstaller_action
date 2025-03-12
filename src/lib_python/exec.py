@@ -8,8 +8,7 @@ from sys import stderr, stdout
 from threading import Thread, current_thread
 from typing import IO, Any, Callable, Literal, Optional, overload
 
-from utility import StreamAutoFlush
-
+from .utility import StreamAutoFlush
 __g_thrads: list[Thread] = []
 
 def convert_to_cmd(cmd: str) -> str:
