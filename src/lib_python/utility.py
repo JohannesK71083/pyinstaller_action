@@ -2,16 +2,16 @@
 
 from __future__ import annotations
 from io import TextIOWrapper
-from os import fsync, listdir, mkdir, path, rename
-from shutil import move
+from os import fsync, path, rename
+# from shutil import move
 from typing import IO, Any, Callable, Optional, Type
 from warnings import warn
-from send2trash import send2trash as s2t
+# from send2trash import send2trash as s2t
 import ctypes
 from sys import stderr
 
-from psutil import process_iter
-from pyautogui import hotkey
+# from psutil import process_iter
+# from pyautogui import hotkey
 
 
 class StreamAutoFlush(TextIOWrapper):
@@ -60,8 +60,8 @@ def check_file_already_open(file_path: str) -> bool:
         return True
 
 
-def check_if_program_is_opened(exe_name: str) -> bool:
-    return exe_name in (p.name() for p in process_iter())
+# def check_if_program_is_opened(exe_name: str) -> bool:
+#     return exe_name in (p.name() for p in process_iter())
 
 
 def convert_relpath_to_script_abspath(input_path: str) -> str:
@@ -98,30 +98,30 @@ def find_nth_occurrence(string: str, find_str: str, n: int, *, start_index: int 
         raise ValueError
 
 
-def send_hotkey(*args: str):
-    hotkey(*args)
+# def send_hotkey(*args: str):
+#     hotkey(*args)
 
 
-def send_folder_contents_to_trash(folder_path: str, temp_del_path: str, ignored_files: tuple[str, ...] = tuple()):
-    if path.exists(temp_del_path):
-        s2t(temp_del_path)
-    try:
-        mkdir(temp_del_path)
-    except:
-        pass
-    if not path.exists(folder_path):
-        print(f'Failed to move {folder_path}. Reason: FileNotFoundError')
-        s2t(temp_del_path)
-        return
-    for filename in listdir(folder_path):
-        if filename in ignored_files:
-            continue
-        file_path = path.join(folder_path, filename)
-        try:
-            move(file_path, temp_del_path)
-        except Exception as e:
-            print('Failed to move %s. Reason: %s' % (file_path, e))
-    s2t(temp_del_path)
+# def send_folder_contents_to_trash(folder_path: str, temp_del_path: str, ignored_files: tuple[str, ...] = tuple()):
+#     if path.exists(temp_del_path):
+#         s2t(temp_del_path)
+#     try:
+#         mkdir(temp_del_path)
+#     except:
+#         pass
+#     if not path.exists(folder_path):
+#         print(f'Failed to move {folder_path}. Reason: FileNotFoundError')
+#         s2t(temp_del_path)
+#         return
+#     for filename in listdir(folder_path):
+#         if filename in ignored_files:
+#             continue
+#         file_path = path.join(folder_path, filename)
+#         try:
+#             move(file_path, temp_del_path)
+#         except Exception as e:
+#             print('Failed to move %s. Reason: %s' % (file_path, e))
+#     s2t(temp_del_path)
 
 
 def close_program(name: str, force_close: bool = True):
