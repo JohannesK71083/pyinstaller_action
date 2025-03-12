@@ -1,3 +1,0 @@
-[submodule "src/lib_python"]
-	path = src/lib_python
-	url = git@github.com:JohannesK71083/lib_python.git
