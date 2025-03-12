@@ -1,6 +1,3 @@
-from os import system, path
-system(f"du -a {path.dirname(__file__)}")
-
 from os import path
 from posixpath import abspath
 from sys import exc_info, stderr

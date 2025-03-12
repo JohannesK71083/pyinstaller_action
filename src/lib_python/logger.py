@@ -11,7 +11,7 @@ from os import devnull, getpid, path
 from enum import Enum
 import warnings
 
-from utility import FileAutoSave, check_file_already_open, convert_relpath_to_script_abspath
+from .utility import FileAutoSave, check_file_already_open, convert_relpath_to_script_abspath
 
 
 # Enums:
@@ -197,12 +197,12 @@ class MSGBoxStream(_StreamBase):
         super().__init__(None, init_message=False, app_name=app_name)
 
     def write(self, text: str) -> int:
-        from utility import msgbox
-        t_app_name_str = ""
-        if self._app_name != None:
-            t_app_name_str = f"{self._app_name} - "
-        msgbox.create_async_msg_box(
-            f"{t_app_name_str}FEHLER", text, msgbox.BUTTON_STYLES.OK)
+        # from utility import msgbox
+        # t_app_name_str = ""
+        # if self._app_name != None:
+        #     t_app_name_str = f"{self._app_name} - "
+        # msgbox.create_async_msg_box(
+        #     f"{t_app_name_str}FEHLER", text, msgbox.BUTTON_STYLES.OK)
         return len(text)
 
     def flush(self) -> None:
@@ -333,8 +333,9 @@ class MSGBoxHandler(_StreamHandlerBase):
         super().__init__(stream, log_level, max_log_level=max_log_level, format=format, handle_exec_info=handle_exec_info)
 
     def join_threads(self):
-        from utility import msgbox
-        msgbox.join_threads()
+        # from utility import msgbox
+        # msgbox.join_threads()
+        pass
 
 
 class Logger:

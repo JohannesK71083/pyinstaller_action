@@ -228,8 +228,5 @@ class SubclassableEnum(metaclass=_SubclassableEnumType):
 
 # have to be at the bottom, otherwise circular import problems
 # fmt: off
-import msgbox # type:ignore
 import exec # type:ignore
-from keylistener import KeyListener # type:ignore
-import keylistener # type:ignore
 # fmt: on
