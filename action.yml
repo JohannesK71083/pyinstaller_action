@@ -45,6 +45,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: checkout repository
+      uses: actions/checkout@v4
+      with:
+        path: "${{ github.action_path }}"
+        submodules: "recursive"
+        repository: ${{ github.action_repository }}
     - name: execute python script
       id: py
       shell: cmd
