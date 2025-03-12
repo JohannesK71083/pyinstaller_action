@@ -228,5 +228,5 @@ class SubclassableEnum(metaclass=_SubclassableEnumType):
 
 # have to be at the bottom, otherwise circular import problems
 # fmt: off
-import exec # type:ignore
+import .exec # type:ignore
 # fmt: on
